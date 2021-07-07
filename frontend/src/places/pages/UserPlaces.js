@@ -9,7 +9,7 @@ const DUMMY_PLACES = [
     title: "nagoya castle",
     description: "a castle",
     imageUrl: "https://source.unsplash.com/random",
-    address: "〒460-0031 愛知県名古屋市中区本丸１−１",
+    address: "1-1 Honmaru, Naka Ward, Nagoya, Aichi 460-0031",
     location: {
       lat: 35.1847501,
       lng: 136.8996883,
@@ -21,7 +21,7 @@ const DUMMY_PLACES = [
     title: "nagoya castle",
     description: "a castle",
     imageUrl: "https://source.unsplash.com/random",
-    address: "〒460-0031 愛知県名古屋市中区本丸１−１",
+    address: "1-1 Honmaru, Naka Ward, Nagoya, Aichi 460-0031",
     location: {
       lat: 35.1847501,
       lng: 136.8996883,
