@@ -37,4 +37,4 @@ const UserPlaces = () => {
   return <PlaceList items={filteredPlaces} />;
 };
 
-export default UserPlaces;
+export { UserPlaces, DUMMY_PLACES };
