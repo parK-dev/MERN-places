@@ -34,6 +34,8 @@ const connectDB = async () => {
     await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useFindAndModify: true,
+      useCreateIndex: true,
     });
     app.listen(process.env.PORT || 5000);
   } catch (e) {
