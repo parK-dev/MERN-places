@@ -1,4 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
+const { validationResult } = require("express-validator");
+
 const HttpError = require("../models/http-error");
 
 const DUMMY_USERS = [
@@ -15,12 +17,17 @@ const getUsers = (req, res, next) => {
 };
 
 const signup = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError("invalid inputs, please check your data", 422));
+  }
+
   const { username, email, password } = req.body;
 
   const userExists = DUMMY_USERS.find((u) => u.email === email);
 
   if (userExists) {
-    next(new HttpError("Email already in use.", 422));
+    return next(new HttpError("Email already in use.", 422));
   }
 
   const user = {
@@ -40,7 +47,7 @@ const login = (req, res, next) => {
 
   const user = DUMMY_USERS.find((u) => u.email === email);
   if (!user || user.password !== password) {
-    next(new HttpError("Wrong credentials", 401));
+    return next(new HttpError("Wrong credentials", 401));
   }
   res.json({ message: "logged in" });
 };
