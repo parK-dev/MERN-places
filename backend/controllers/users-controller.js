@@ -4,19 +4,13 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    username: "park",
-    email: "k@k.com",
-    password: "wellan",
-  },
-];
-
 const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find();
-  } catch (error) {}
+    const users = await User.find({}, "-password");
+    res.json({ users: users.map((user) => user.toObject({ getters: true })) });
+  } catch (error) {
+    return next(new HttpError("Fetching user failed. Please try again.", 500));
+  }
 };
 
 const signup = async (req, res, next) => {
@@ -37,6 +31,7 @@ const signup = async (req, res, next) => {
       email,
       password,
       avatar: "https://source.unsplash.com/random",
+      places: [],
     });
     await user.save();
     res.status(201).json({ user: user.toObject({ getters: true }) });
