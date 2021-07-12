@@ -1,40 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import PlaceList from "../components/PlaceList";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "nagoya castle",
-    description: "a castle",
-    imageUrl: "https://source.unsplash.com/random",
-    address: "1-1 Honmaru, Naka Ward, Nagoya, Aichi 460-0031",
-    location: {
-      lat: 35.1847501,
-      lng: 136.8996883,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "nagoya castle",
-    description: "a castle",
-    imageUrl: "https://source.unsplash.com/random",
-    address: "1-1 Honmaru, Naka Ward, Nagoya, Aichi 460-0031",
-    location: {
-      lat: 35.1847501,
-      lng: 136.8996883,
-    },
-    creator: "u2",
-  },
-];
 const UserPlaces = () => {
+  const [loadedPlaces, setLoadedPlaces] = useState();
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const userId = useParams().userId;
-  const filteredPlaces = DUMMY_PLACES.filter(
-    (place) => place.creator === userId
+
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      try {
+        const responseData = await sendRequest(
+          `http://localhost:5000/api/places/user/${userId}`
+        );
+        setLoadedPlaces(responseData.places);
+      } catch (e) {
+        // Error handled by custom hook
+      }
+    };
+    fetchPlaces();
+  }, [sendRequest, userId]);
+
+  const placeDeleteHandler = (deletedPlaceId) => {
+    setLoadedPlaces((prevPlaces) =>
+      prevPlaces.filter((place) => place.id !== deletedPlaceId)
+    );
+  };
+
+  return (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && (
+        <div className="center">
+          <LoadingSpinner />
+        </div>
+      )}
+      {!isLoading && loadedPlaces && (
+        <PlaceList items={loadedPlaces} onDeletePlace={placeDeleteHandler} />
+      )}
+    </React.Fragment>
   );
-  return <PlaceList items={filteredPlaces} />;
 };
 
-export { UserPlaces, DUMMY_PLACES };
+export { UserPlaces };

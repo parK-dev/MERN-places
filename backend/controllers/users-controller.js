@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
@@ -49,9 +48,10 @@ const login = async (req, res, next) => {
     if (!user || user.password !== password) {
       return next(new HttpError("Wrong credentials.", 500));
     }
-    res.json({ message: "logged in" });
-  } catch (e) {}
-  next(new HttpError("Wrong credentials.", 500));
+    res.json({ message: "logged in", user: user.toObject({ getters: true }) });
+  } catch (e) {
+    return next(new HttpError("Wrong credentials.", 500));
+  }
 };
 
 exports.getUsers = getUsers;
