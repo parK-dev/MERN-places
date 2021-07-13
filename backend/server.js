@@ -3,7 +3,7 @@ const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
-// require("dotenv").config({ silent: true });
+// require("dotenv").config({ silent: true }); This line is required in DEV, must be removed in PROD.
 
 const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
