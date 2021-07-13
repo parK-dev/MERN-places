@@ -1,4 +1,6 @@
 const { validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
@@ -25,15 +27,24 @@ const signup = async (req, res, next) => {
     existingUser &&
       next(new HttpError("This user already exists, please login.", 500));
 
+    const hashedPassword = await bcrypt.hash(password, 8);
+
     const user = new User({
       username,
       email,
-      password,
+      password: hashedPassword,
       avatar: req.file.path,
       places: [],
     });
+
     await user.save();
-    res.status(201).json({ user: user.toObject({ getters: true }) });
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.TK,
+      { expiresIn: "1h" }
+    );
+    res.status(201).json({ userId: user.id, email: user.email, token });
   } catch (e) {
     return next(
       new HttpError("Failed to sign up. Please try again later.", 500)
@@ -45,12 +56,25 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user || user.password !== password) {
-      return next(new HttpError("Wrong credentials.", 500));
+
+    if (!user) {
+      return next(new HttpError("Wrong credentials.", 403));
     }
-    res.json({ message: "logged in", user: user.toObject({ getters: true }) });
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      return next(new HttpError("Wrong credentials.", 403));
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.TK,
+      { expiresIn: "1h" }
+    );
+    res.json({ userId: user.id, email: user.email, token });
   } catch (e) {
-    return next(new HttpError("Wrong credentials.", 500));
+    return next(new HttpError("Server Error", 500));
   }
 };
 

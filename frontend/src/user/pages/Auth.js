@@ -74,7 +74,7 @@ const Auth = () => {
           }),
           { "Content-Type": "application/json" }
         );
-        auth.login(responseData.user.id);
+        auth.login(responseData.userId, responseData.token);
       } catch (error) {
         // Error handled in custom hook
       }
@@ -91,7 +91,7 @@ const Auth = () => {
           formData
         );
         const responseData = await response.json();
-        auth.login(responseData.user.id);
+        auth.login(responseData.userId, responseData.token);
       } catch (e) {
         // Error handled in custom hook
       }

@@ -49,7 +49,7 @@ const createPlace = async (req, res, next) => {
       address,
       location: coordinates,
       image: req.file.path,
-      creator,
+      creator: req.userData.userId,
     });
 
     const user = await User.findById(place.creator);
@@ -77,9 +77,16 @@ const editPlace = async (req, res, next) => {
     const id = req.params.id;
     const { title, description } = req.body;
     const place = await Place.findById(id);
+
+    if (place.creator.toString() !== req.userData.userId) {
+      return next(new HttpError("Unauthorized request.", 401));
+    }
+
     place.title = title;
     place.description = description;
+
     await place.save();
+
     res.status(200).json({ place });
   } catch (e) {
     return next(new HttpError("Could not find a place with this id", 404));
@@ -90,7 +97,12 @@ const deletePlace = async (req, res, next) => {
   try {
     const id = req.params.id;
     const place = await Place.findById(id).populate("creator");
+
     !place && next(new HttpError("Could not find a place with this id", 404));
+
+    if (place.creator.id !== req.userData.userId) {
+      return next(new HttpError("Unauthorized request.", 401));
+    }
 
     const imagePath = place.image;
 
