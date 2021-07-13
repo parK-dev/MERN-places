@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const mongoose = require("mongoose");
+const fs = require("fs");
 
 const HttpError = require("../models/http-error");
 const geolocate = require("../utils/geolocation");
@@ -47,7 +48,7 @@ const createPlace = async (req, res, next) => {
       description,
       address,
       location: coordinates,
-      image: "https://source.unsplash.com/random",
+      image: req.file.path,
       creator,
     });
 
@@ -91,12 +92,17 @@ const deletePlace = async (req, res, next) => {
     const place = await Place.findById(id).populate("creator");
     !place && next(new HttpError("Could not find a place with this id", 404));
 
+    const imagePath = place.image;
+
     const session = await mongoose.startSession();
     session.startTransaction();
     await place.remove({ session });
     await place.creator.places.pull(place);
     await place.creator.save({ session });
     await session.commitTransaction();
+    fs.unlink(imagePath, (error) => {
+      console.log(error);
+    });
     res.status(200).json({ message: "Place deleted." });
   } catch (e) {
     return next(new HttpError("Could not delete this place", 500));

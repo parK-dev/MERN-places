@@ -19,7 +19,7 @@ const signup = async (req, res, next) => {
   }
 
   try {
-    const { username, email, password, avatar } = req.body;
+    const { username, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     existingUser &&
@@ -29,7 +29,7 @@ const signup = async (req, res, next) => {
       username,
       email,
       password,
-      avatar: "https://source.unsplash.com/random",
+      avatar: req.file.path,
       places: [],
     });
     await user.save();
