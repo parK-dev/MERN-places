@@ -3,7 +3,7 @@ const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
-require("dotenv").config({ silent: true });
+// require("dotenv").config({ silent: true });
 
 const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
